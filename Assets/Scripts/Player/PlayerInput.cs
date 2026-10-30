@@ -87,6 +87,10 @@ public class PlayerInput : MonoBehaviour
 
         Vector2 moveInput = playerControls.Player.Move.ReadValue<Vector2>();
         float hInput = moveInput.x;
+        if (Mathf.Abs(hInput) < 0.1f)
+        {
+            hInput = 0f;
+        }
 
         movementComponent.Move(hInput);
     }
@@ -96,10 +100,25 @@ public class PlayerInput : MonoBehaviour
     {
         if(Mouse.current == null || mainCam == null) return;
 
-        Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
-        Vector3 mouseWorldPosition = mainCam.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, mainCam.nearClipPlane));
+        Vector2 aimInput = playerControls.Player.Aim.ReadValue<Vector2>();
+        Vector2 aimDirection = Vector2.zero;
 
-        Vector2 aimDirection = (mouseWorldPosition - transform.position).normalized;
+        InputDevice activeDevice = playerControls.Player.Aim.activeControl?.device;
+
+        if (activeDevice == null) return;
+
+        if(activeDevice is Gamepad)
+        {
+            if(aimInput.sqrMagnitude > 0.1f)
+            {
+                aimDirection = aimInput.normalized;
+            }
+        }
+        else
+        {
+            Vector3 mouseWorldPosition = mainCam.ScreenToWorldPoint(new Vector3(aimInput.x, aimInput.y, mainCam.nearClipPlane));
+            aimDirection = (mouseWorldPosition - transform.position).normalized;
+        }
 
         Debug.DrawRay(transform.position, aimDirection * 10, Color.red);
     }

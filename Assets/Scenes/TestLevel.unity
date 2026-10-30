@@ -573,7 +573,7 @@ MonoBehaviour:
   acceleration: 10
   deacceleration: 50
   jumpForce: 10
-  jumpCancelMultiplier: 0.9
+  jumpCancelMultiplier: 0.3
   jumpBufferMaxTime: 0.1
   coyoteMaxTime: 0.1
   rb: {fileID: 1484724781}
