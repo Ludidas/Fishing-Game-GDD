@@ -13,6 +13,8 @@ public class PlayerInput : MonoBehaviour
     [Header("Components")]
     [SerializeField]
     private MovementComponent movementComponent;
+    [SerializeField]
+    private GrappleComponent grappleComponent;
 
     /// <summary>
     /// Initialize the Input Handler
@@ -24,6 +26,11 @@ public class PlayerInput : MonoBehaviour
         if (movementComponent == null)
         {
             movementComponent = GetComponent<MovementComponent>();
+        }
+
+        if (grappleComponent == null)
+        {
+            grappleComponent = GetComponent<GrappleComponent>();
         }
     }
 
@@ -92,13 +99,13 @@ public class PlayerInput : MonoBehaviour
             hInput = 0f;
         }
 
-        movementComponent.Move(hInput);
+        movementComponent?.Move(hInput);
     }
 
     // most dummy code, will need to figure out to determine between reading mouse and/or gamepad
     void HandleGrappleInput()
     {
-        if(Mouse.current == null || mainCam == null) return;
+        if(mainCam == null) return;
 
         Vector2 aimInput = playerControls.Player.Aim.ReadValue<Vector2>();
         Vector2 aimDirection = Vector2.zero;
@@ -120,7 +127,9 @@ public class PlayerInput : MonoBehaviour
             aimDirection = (mouseWorldPosition - transform.position).normalized;
         }
 
-        Debug.DrawRay(transform.position, aimDirection * 10, Color.red);
+        grappleComponent?.SetAimDirection(aimDirection);
+
+        //Debug.DrawRay(transform.position, aimDirection * 10, Color.red);
     }
 
     /// <summary>
@@ -143,7 +152,7 @@ public class PlayerInput : MonoBehaviour
 
     void OnHookPerformed(InputAction.CallbackContext context)
     {
-        //TODO
+        grappleComponent?.HookHandler();
     }
 
     void OnReelInPerformed(InputAction.CallbackContext context)
