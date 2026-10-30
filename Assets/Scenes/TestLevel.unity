@@ -556,7 +556,7 @@ Rigidbody2D:
   m_Interpolate: 1
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 0
+  m_Constraints: 4
 --- !u!114 &1484724782
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -574,6 +574,8 @@ MonoBehaviour:
   deacceleration: 50
   jumpForce: 10
   jumpCancelMultiplier: 0.9
+  jumpBufferMaxTime: 0.1
+  coyoteMaxTime: 0.1
   rb: {fileID: 1484724781}
   groundCheck: {fileID: 974407024}
   groundCheckWidth: 1

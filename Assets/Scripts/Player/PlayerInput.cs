@@ -1,6 +1,9 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 
+/// <summary>
+/// Handles input from the player
+/// </summary>
 public class PlayerInput : MonoBehaviour
 {
     private PlayerControls playerControls;

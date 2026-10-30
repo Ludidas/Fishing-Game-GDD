@@ -1,6 +1,9 @@
 using UnityEditor.U2D.Aseprite;
 using UnityEngine;
 
+/// <summary>
+/// Provides movement capabilities for the object
+/// </summary>
 public class MovementComponent : MonoBehaviour
 {
     [Header("Movement")]
@@ -11,6 +14,12 @@ public class MovementComponent : MonoBehaviour
     [Header("Jump")]
     public float jumpForce = 10f;
     [Range(0f, 1f)] public float jumpCancelMultiplier = 0.9f;
+    public float jumpBufferMaxTime = 0.1f;
+    private float jumpBufferTimer;
+
+    [Header("Coyote Time")]
+    public float coyoteMaxTime = 0.1f;
+    private float coyoteTimer;
 
     [Header("Rigidbody")]
     public Rigidbody2D rb;
@@ -25,6 +34,48 @@ public class MovementComponent : MonoBehaviour
     private bool canMove = true;
     private bool isGrounded;
     private float facingDirection = 1f;
+
+    /// <summary>
+    /// Updates Timers every frame
+    /// </summary>
+    void Update()
+    {
+        UpdateCoyoteTimer();
+        UpdateJumpBufferTimer();
+    }
+    
+    /// <summary>
+    /// Whenever the player is not grounded, the coyote timer is decreased.
+    /// We use this to replace any IsGrounded calls else where to use the coyote timer
+    /// </summary>
+    private void UpdateCoyoteTimer()
+    {
+        if (IsGrounded())
+        {
+            coyoteTimer = coyoteMaxTime;
+        }
+        else
+        {
+            coyoteTimer -= Time.deltaTime;
+        }
+    }
+
+    /// <summary>
+    /// Having a jump buffer timer allows the player to press the jump button slightly
+    /// early and have it still work.
+    /// </summary>
+    private void UpdateJumpBufferTimer()
+    {
+        if(jumpBufferTimer > 0)
+        {
+            jumpBufferTimer -= Time.deltaTime;
+        }
+
+        if (jumpBufferTimer > 0f && coyoteTimer > 0f)
+        {
+            ExecuteJump();
+        }
+    }
 
     /// <summary>
     /// Move the character horizontally using provided input
@@ -47,17 +98,29 @@ public class MovementComponent : MonoBehaviour
     }
 
     /// <summary>
-    /// Simply update the linear velocity of the character. 
-    /// This approach may be limited later if the jump becomes more complex
+    /// Causes the character to jump if grounded, else we start the jump buffer timer
     /// </summary>
     public void Jump()
     {
         if (!canMove) return;
 
-        if (IsGrounded())
+        jumpBufferTimer = jumpBufferMaxTime;
+
+        if(coyoteTimer > 0f)
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            ExecuteJump();
         }
+    }
+
+    /// <summary>
+    /// Simply update the linear velocity of the character. 
+    /// This approach may be limited later if the jump becomes more complex
+    /// </summary>
+    private void ExecuteJump()
+    {
+        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        jumpBufferTimer = 0f;
+        coyoteTimer = 0f;
     }
 
     /// <summary>
