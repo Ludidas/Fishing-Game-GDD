@@ -102,7 +102,10 @@ public class PlayerInput : MonoBehaviour
         movementComponent?.Move(hInput);
     }
 
-    // most dummy code, will need to figure out to determine between reading mouse and/or gamepad
+    /// <summary>
+    /// Sets the aim direction based on the input.
+    /// If gamepad has been detected last, it will override the mouse position
+    /// </summary>
     void HandleGrappleInput()
     {
         if(mainCam == null) return;
@@ -128,8 +131,6 @@ public class PlayerInput : MonoBehaviour
         }
 
         grappleComponent?.SetAimDirection(aimDirection);
-
-        //Debug.DrawRay(transform.position, aimDirection * 10, Color.red);
     }
 
     /// <summary>
@@ -150,6 +151,10 @@ public class PlayerInput : MonoBehaviour
         movementComponent?.CancelJump();
     }
 
+    /// <summary>
+    /// Call the grapple component to hook or unhook from a surface
+    /// </summary>
+    /// <param name="context"></param>
     void OnHookPerformed(InputAction.CallbackContext context)
     {
         grappleComponent?.HookHandler();

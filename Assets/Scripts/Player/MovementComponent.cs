@@ -6,10 +6,14 @@ using UnityEngine;
 /// </summary>
 public class MovementComponent : MonoBehaviour
 {
+    [Header("Components")]
+    [SerializeField] private GrappleComponent grappleComponent;
+
     [Header("Movement")]
     public float moveSpeed = 5f;
     public float acceleration = 10f;
     public float deacceleration = 50f;
+    public float airDrag = 0.1f;
 
     [Header("Jump")]
     public float jumpForce = 10f;
@@ -78,17 +82,53 @@ public class MovementComponent : MonoBehaviour
     }
 
     /// <summary>
-    /// Move the character horizontally using provided input
+    /// Move the character horizontally using provided input.
+    /// If the character is currently grappled, the movement will be influenced by the grapple mechanics.
+    /// TODO: Clean this and put in multiple modular methods
     /// </summary>
     /// <param name="hInput">The horizontal input value. -1 is full left, 1 is full right.</param>
     public void Move(float hInput)
     {
         if (!canMove) return;
 
+        float hVelocity = 0;
+
+        if(grappleComponent && grappleComponent.IsGrappleTensionActive())
+        {
+            if(!IsGrounded())
+            {
+                grappleComponent.ApplySwingForce(hInput);
+                return;
+            }
+
+            if (grappleComponent.IsGrappleTensionActive())
+            {
+                float dirToAnchor = Mathf.Sign(grappleComponent.springJoint.connectedAnchor.x - rb.position.x);
+
+                if(Mathf.Abs(hInput) < 0.1f || Mathf.Sign(hInput) != dirToAnchor)
+                {
+                    rb.linearVelocity = new Vector2(rb.linearVelocity.x * grappleComponent.grappleDrag, rb.linearVelocity.y);
+                    return;
+                }
+            }
+        }
+
         float targetSpeed = hInput * moveSpeed;
+        float currentHSpeed = rb.linearVelocity.x;
+
+        if (!IsGrounded() && Mathf.Abs(currentHSpeed) > Mathf.Abs(targetSpeed))
+        {
+            if (hInput == 0 || Mathf.Sign(hInput) == Mathf.Sign(currentHSpeed))
+            {
+                float hVelocityDecay = Mathf.MoveTowards(currentHSpeed, targetSpeed, airDrag * Time.fixedDeltaTime);
+                rb.linearVelocity = new Vector2(hVelocityDecay, rb.linearVelocity.y);
+                return;
+            }
+        }
+
         float accelerationRate = Mathf.Abs(targetSpeed) > 0.1f ? acceleration : deacceleration;
 
-        float hVelocity = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelerationRate * Time.fixedDeltaTime);
+        hVelocity = Mathf.MoveTowards(rb.linearVelocity.x, targetSpeed, accelerationRate * Time.fixedDeltaTime);
         rb.linearVelocity = new Vector2(hVelocity, rb.linearVelocity.y);
 
         if (Mathf.Abs(hInput) > 0.1f)
@@ -109,6 +149,14 @@ public class MovementComponent : MonoBehaviour
         if(coyoteTimer > 0f)
         {
             ExecuteJump();
+        }
+        else if (grappleComponent && grappleComponent.currentState is GrappleComponent.GrappleState.Hooked)
+        {
+            if(grappleComponent.springJoint.connectedAnchor.y > rb.position.y)
+            {
+                ExecuteJump();
+                grappleComponent.Unhook();
+            }
         }
     }
 
