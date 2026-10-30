@@ -8,6 +8,8 @@ public class PlayerInput : MonoBehaviour
 {
     private PlayerControls playerControls;
 
+    public Camera mainCam;
+
     [Header("Components")]
     [SerializeField]
     private MovementComponent movementComponent;
@@ -33,8 +35,17 @@ public class PlayerInput : MonoBehaviour
         playerControls.Enable();
 
         playerControls.Player.Jump.performed += OnJumpPerformed;
-
         playerControls.Player.Jump.canceled += OnJumpCanceled;
+
+        playerControls.Player.Hook.performed += OnHookPerformed;
+
+        playerControls.Player.ReelIn.performed += OnReelInPerformed;
+        playerControls.Player.ReelIn.canceled += OnReelInCanceled;
+
+        playerControls.Player.ReelOut.performed += OnReelOutPerformed;
+        playerControls.Player.ReelOut.canceled += OnReelOutCanceled;
+
+        playerControls.Player.Melee.performed += OnMeleePerformed;
     }
 
     /// <summary>
@@ -46,6 +57,16 @@ public class PlayerInput : MonoBehaviour
 
         playerControls.Player.Jump.performed -= OnJumpPerformed;
         playerControls.Player.Jump.canceled -= OnJumpCanceled;
+
+        playerControls.Player.Hook.performed -= OnHookPerformed;
+
+        playerControls.Player.ReelIn.performed -= OnReelInPerformed;
+        playerControls.Player.ReelIn.canceled -= OnReelInCanceled;
+
+        playerControls.Player.ReelOut.performed -= OnReelOutPerformed;
+        playerControls.Player.ReelOut.canceled -= OnReelOutCanceled;
+
+        playerControls.Player.Melee.performed -= OnMeleePerformed;
     }
 
     /// <summary>
@@ -54,6 +75,7 @@ public class PlayerInput : MonoBehaviour
     void Update()
     {
         HandleMovementInput();
+        HandleGrappleInput();
     }
 
     /// <summary>
@@ -67,6 +89,19 @@ public class PlayerInput : MonoBehaviour
         float hInput = moveInput.x;
 
         movementComponent.Move(hInput);
+    }
+
+    // most dummy code, will need to figure out to determine between reading mouse and/or gamepad
+    void HandleGrappleInput()
+    {
+        if(Mouse.current == null || mainCam == null) return;
+
+        Vector2 mouseScreenPosition = Mouse.current.position.ReadValue();
+        Vector3 mouseWorldPosition = mainCam.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, mainCam.nearClipPlane));
+
+        Vector2 aimDirection = (mouseWorldPosition - transform.position).normalized;
+
+        Debug.DrawRay(transform.position, aimDirection * 10, Color.red);
     }
 
     /// <summary>
@@ -85,5 +120,35 @@ public class PlayerInput : MonoBehaviour
     void OnJumpCanceled(InputAction.CallbackContext context)
     {
         movementComponent?.CancelJump();
+    }
+
+    void OnHookPerformed(InputAction.CallbackContext context)
+    {
+        //TODO
+    }
+
+    void OnReelInPerformed(InputAction.CallbackContext context)
+    {
+        //TODO
+    }
+
+    void OnReelInCanceled(InputAction.CallbackContext context)
+    {
+        //TODO
+    }
+
+    void OnReelOutPerformed(InputAction.CallbackContext context)
+    {
+        //TODO
+    }
+
+    void OnReelOutCanceled(InputAction.CallbackContext context)
+    {
+        //TODO
+    }
+
+    void OnMeleePerformed(InputAction.CallbackContext context)
+    {
+        //TODO
     }
 }

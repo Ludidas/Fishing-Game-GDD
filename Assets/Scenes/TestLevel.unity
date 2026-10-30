@@ -494,7 +494,7 @@ BoxCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 32843f1aa91aab44086d9f2e89abcd47, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -595,6 +595,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd50b35d4d60b7f43b9dd605d038485f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerInput
+  mainCam: {fileID: 156768630}
   movementComponent: {fileID: 1484724782}
 --- !u!1 &1515032862
 GameObject:
