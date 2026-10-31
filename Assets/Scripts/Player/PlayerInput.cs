@@ -46,12 +46,6 @@ public class PlayerInput : MonoBehaviour
 
         playerControls.Player.Hook.performed += OnHookPerformed;
 
-        playerControls.Player.ReelIn.performed += OnReelInPerformed;
-        playerControls.Player.ReelIn.canceled += OnReelInCanceled;
-
-        playerControls.Player.ReelOut.performed += OnReelOutPerformed;
-        playerControls.Player.ReelOut.canceled += OnReelOutCanceled;
-
         playerControls.Player.Melee.performed += OnMeleePerformed;
     }
 
@@ -67,12 +61,6 @@ public class PlayerInput : MonoBehaviour
 
         playerControls.Player.Hook.performed -= OnHookPerformed;
 
-        playerControls.Player.ReelIn.performed -= OnReelInPerformed;
-        playerControls.Player.ReelIn.canceled -= OnReelInCanceled;
-
-        playerControls.Player.ReelOut.performed -= OnReelOutPerformed;
-        playerControls.Player.ReelOut.canceled -= OnReelOutCanceled;
-
         playerControls.Player.Melee.performed -= OnMeleePerformed;
     }
 
@@ -83,6 +71,7 @@ public class PlayerInput : MonoBehaviour
     {
         HandleMovementInput();
         HandleGrappleInput();
+        HandleReelInput();
     }
 
     /// <summary>
@@ -133,6 +122,25 @@ public class PlayerInput : MonoBehaviour
         grappleComponent?.SetAimDirection(aimDirection);
     }
 
+    void HandleReelInput()
+    {
+        if(grappleComponent == null) return;
+
+        float reelInput;
+        float reelInInput = playerControls.Player.ReelIn.ReadValue<float>();
+        float reelOutInput = playerControls.Player.ReelOut.ReadValue<float>();
+        reelInput = reelInInput - reelOutInput;
+
+        if(reelInput > 0)
+        {
+            grappleComponent?.ReelIn();
+        }
+        else if(reelInput < 0)
+        {
+            grappleComponent?.ReelOut();
+        }
+    }
+
     /// <summary>
     /// Call the movememnt component jump function when jump is pressed
     /// </summary>
@@ -158,26 +166,6 @@ public class PlayerInput : MonoBehaviour
     void OnHookPerformed(InputAction.CallbackContext context)
     {
         grappleComponent?.HookHandler();
-    }
-
-    void OnReelInPerformed(InputAction.CallbackContext context)
-    {
-        //TODO
-    }
-
-    void OnReelInCanceled(InputAction.CallbackContext context)
-    {
-        //TODO
-    }
-
-    void OnReelOutPerformed(InputAction.CallbackContext context)
-    {
-        //TODO
-    }
-
-    void OnReelOutCanceled(InputAction.CallbackContext context)
-    {
-        //TODO
     }
 
     void OnMeleePerformed(InputAction.CallbackContext context)

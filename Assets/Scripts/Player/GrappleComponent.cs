@@ -29,6 +29,7 @@ public class GrappleComponent : MonoBehaviour
     public LayerMask grappleLayer;
 
     private float currentGrappleLength;
+    private float currentMaxGrappleLength;
     private Vector2 aimDirection;
 
     /// <summary>
@@ -157,6 +158,7 @@ public class GrappleComponent : MonoBehaviour
         {
             springJoint.connectedAnchor = hit.point;
             currentGrappleLength = Vector2.Distance(transform.position, hit.point);
+            currentMaxGrappleLength = currentGrappleLength;
             springJoint.distance = currentGrappleLength;
             springJoint.enabled = true;
 
@@ -173,7 +175,28 @@ public class GrappleComponent : MonoBehaviour
     {
         currentState = GrappleState.Idle;
 
+        currentGrappleLength = 0;
+        currentMaxGrappleLength = 0;
+
         if(lineRenderer != null) lineRenderer.enabled = false;
         springJoint.enabled = false;
+    }
+
+    public void ReelIn()
+    {
+        if(currentState != GrappleState.Hooked) return;
+
+        currentGrappleLength -= reelInSpeed * Time.deltaTime;
+
+        currentGrappleLength = Mathf.Clamp(currentGrappleLength, 0f, currentMaxGrappleLength);
+    }
+
+    public void ReelOut()
+    {
+        if(currentState != GrappleState.Hooked) return;
+
+        currentGrappleLength += reelOutSpeed * Time.deltaTime;
+
+        currentGrappleLength = Mathf.Clamp(currentGrappleLength, 0f, currentMaxGrappleLength);
     }
 }
