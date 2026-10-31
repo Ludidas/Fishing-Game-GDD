@@ -17,6 +17,7 @@ public class GrappleComponent : MonoBehaviour
     public Rigidbody2D rb;
     public SpringJoint2D springJoint;
     public float grappleDrag = 0.9f;
+    public float grappleJumpMultiplier = 0.9f;
 
     [Header("Visuals")]
     public LineRenderer lineRenderer;
@@ -31,6 +32,7 @@ public class GrappleComponent : MonoBehaviour
     private float currentGrappleLength;
     private float currentMaxGrappleLength;
     private Vector2 aimDirection;
+    private bool wasGrappledAbove;
 
     /// <summary>
     /// Initialize the lineRenderer (TODO: this is temporary until we have a sprite for the fishing line)
@@ -162,6 +164,8 @@ public class GrappleComponent : MonoBehaviour
             springJoint.distance = currentGrappleLength;
             springJoint.enabled = true;
 
+            wasGrappledAbove = hit.point.y > rb.position.y;
+
             if(lineRenderer != null) lineRenderer.enabled = true;
 
             currentState = GrappleState.Hooked;
@@ -177,6 +181,7 @@ public class GrappleComponent : MonoBehaviour
 
         currentGrappleLength = 0;
         currentMaxGrappleLength = 0;
+        wasGrappledAbove = false;
 
         if(lineRenderer != null) lineRenderer.enabled = false;
         springJoint.enabled = false;
@@ -204,5 +209,10 @@ public class GrappleComponent : MonoBehaviour
         currentGrappleLength += reelOutSpeed * Time.deltaTime;
 
         currentGrappleLength = Mathf.Clamp(currentGrappleLength, 0f, currentMaxGrappleLength);
+    }
+
+    public bool WasGrappledAbove()
+    {
+        return wasGrappledAbove;
     }
 }

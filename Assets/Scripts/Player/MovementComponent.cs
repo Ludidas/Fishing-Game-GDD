@@ -152,10 +152,9 @@ public class MovementComponent : MonoBehaviour
         }
         else if (grappleComponent && grappleComponent.currentState is GrappleComponent.GrappleState.Hooked)
         {
-            if(grappleComponent.springJoint.connectedAnchor.y > rb.position.y)
+            if(grappleComponent.WasGrappledAbove() || grappleComponent.springJoint.connectedAnchor.y > rb.position.y)
             {
                 ExecuteJump();
-                grappleComponent.Unhook();
             }
         }
     }
@@ -166,7 +165,20 @@ public class MovementComponent : MonoBehaviour
     /// </summary>
     private void ExecuteJump()
     {
-        rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+        if(rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, 0f);
+        }
+
+        if(grappleComponent && grappleComponent.currentState is GrappleComponent.GrappleState.Hooked)
+        {
+            rb.AddForce(new Vector2(0, jumpForce * grappleComponent.grappleJumpMultiplier), ForceMode2D.Impulse);
+            grappleComponent.Unhook();
+        }
+        else
+        {
+            rb.AddForce(new Vector2(0, jumpForce), ForceMode2D.Impulse);
+        }
         jumpBufferTimer = 0f;
         coyoteTimer = 0f;
     }
