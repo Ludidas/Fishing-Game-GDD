@@ -182,6 +182,9 @@ public class GrappleComponent : MonoBehaviour
         springJoint.enabled = false;
     }
 
+    /// <summary>
+    /// Shorten the distance of the grapple
+    /// </summary>
     public void ReelIn()
     {
         if(currentState != GrappleState.Hooked) return;
@@ -191,6 +194,9 @@ public class GrappleComponent : MonoBehaviour
         currentGrappleLength = Mathf.Clamp(currentGrappleLength, 0f, currentMaxGrappleLength);
     }
 
+    /// <summary>
+    /// Lengthen the distance of the grapple
+    /// </summary>
     public void ReelOut()
     {
         if(currentState != GrappleState.Hooked) return;

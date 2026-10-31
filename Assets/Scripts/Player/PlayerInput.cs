@@ -122,14 +122,16 @@ public class PlayerInput : MonoBehaviour
         grappleComponent?.SetAimDirection(aimDirection);
     }
 
+    /// <summary>
+    /// Handles the reel input for the grapple component, determining whether to reel in or out based on the input.
+    /// </summary>
     void HandleReelInput()
     {
         if(grappleComponent == null) return;
 
-        float reelInput;
         float reelInInput = playerControls.Player.ReelIn.ReadValue<float>();
         float reelOutInput = playerControls.Player.ReelOut.ReadValue<float>();
-        reelInput = reelInInput - reelOutInput;
+        float reelInput = reelInInput - reelOutInput;
 
         if(reelInput > 0)
         {
