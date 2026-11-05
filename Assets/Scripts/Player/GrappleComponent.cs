@@ -29,9 +29,14 @@ public class GrappleComponent : MonoBehaviour
     public float swingForce = 2f;
     public LayerMask grappleLayer;
 
+    [Header("Hook Travel Settings")]
+    public float hookSpeed = 40f;
+
     private float currentGrappleLength;
     private float currentMaxGrappleLength;
     private Vector2 aimDirection;
+    private Vector2 hookTipPosition;
+    private Vector2 hookTravelDirection;
     private bool wasGrappledAbove;
 
     /// <summary>
@@ -47,10 +52,17 @@ public class GrappleComponent : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (currentState == GrappleState.Hooked && lineRenderer)
+        if (lineRenderer == null) return;
+
+        if (currentState == GrappleState.Hooked)
         {
             lineRenderer.SetPosition(0, transform.position);
             lineRenderer.SetPosition(1, springJoint.connectedAnchor);
+        }
+        else if (currentState == GrappleState.Hooking)
+        {
+            lineRenderer.SetPosition(0, transform.position);
+            lineRenderer.SetPosition(1, hookTipPosition);
         }
     }
 
@@ -66,6 +78,10 @@ public class GrappleComponent : MonoBehaviour
         {
             DebugViewer.Log("Rope Length", currentGrappleLength.ToString("F1"));
             SetSpringJointDistance();
+        }
+        else if (currentState == GrappleState.Hooking)
+        {
+            UpdateHookTravel();
         }
         else
         {
@@ -154,21 +170,48 @@ public class GrappleComponent : MonoBehaviour
     {
         if (aimDirection == Vector2.zero) return;
 
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, aimDirection, maxGrappleDistance, grappleLayer);
+        hookTravelDirection = aimDirection.normalized;
+        hookTipPosition = transform.position;
+        currentState = GrappleState.Hooking;
 
-        if (hit.collider != null)
+        if (lineRenderer != null) lineRenderer.enabled = true;
+    }
+
+    /// <summary>
+    /// Attaches the grapple to a specific point
+    /// </summary>
+    /// <param name="point">The point to attach the grapple to.</param>
+    private void AttachHook(Vector2 point)
+    {
+        springJoint.connectedAnchor = point;
+        currentGrappleLength = Vector2.Distance(transform.position, point);
+        currentMaxGrappleLength = currentGrappleLength;
+        springJoint.distance = currentGrappleLength;
+        springJoint.enabled = true;
+
+        wasGrappledAbove = point.y > rb.position.y;
+        currentState = GrappleState.Hooked;
+    }
+
+    /// <summary>
+    /// Updates the hook's position each frame
+    /// </summary>
+    private void UpdateHookTravel()
+    {
+        float hookDistance = hookSpeed * Time.fixedDeltaTime;
+
+        RaycastHit2D hit = Physics2D.Raycast(hookTipPosition, hookTravelDirection, hookDistance, grappleLayer);
+        if(hit.collider != null)
         {
-            springJoint.connectedAnchor = hit.point;
-            currentGrappleLength = Vector2.Distance(transform.position, hit.point);
-            currentMaxGrappleLength = currentGrappleLength;
-            springJoint.distance = currentGrappleLength;
-            springJoint.enabled = true;
+            AttachHook(hit.point);
+            return;
+        }
 
-            wasGrappledAbove = hit.point.y > rb.position.y;
+        hookTipPosition += hookTravelDirection * hookDistance;
 
-            if(lineRenderer != null) lineRenderer.enabled = true;
-
-            currentState = GrappleState.Hooked;
+        if (Vector2.Distance(transform.position, hookTipPosition) > maxGrappleDistance)
+        {
+            Unhook();
         }
     }
 
@@ -211,6 +254,10 @@ public class GrappleComponent : MonoBehaviour
         currentGrappleLength = Mathf.Clamp(currentGrappleLength, 0f, currentMaxGrappleLength);
     }
 
+    /// <summary>
+    /// Checks if the grapple was hooked above the player.
+    /// </summary>
+    /// <returns></returns>
     public bool WasGrappledAbove()
     {
         return wasGrappledAbove;
