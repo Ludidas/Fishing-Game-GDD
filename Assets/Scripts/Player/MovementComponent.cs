@@ -220,4 +220,30 @@ public class MovementComponent : MonoBehaviour
 
         rb.linearVelocity = new Vector2(0f, 0f);
     }
+
+    /// <summary>
+    /// Reset the speed to 0
+    /// </summary>
+    public void ResetSpeed()
+    {
+        rb.linearVelocity = new Vector2(0f, 0f);
+    }
+
+    /// <summary>
+    /// Set the character's position
+    /// </summary>
+    public void SetPosition(Vector2 targetPosition)
+    {
+        transform.position = targetPosition;
+    }
+
+    /// <summary>
+    /// Reset the grapple
+    /// </summary>
+    public void ResetGrapple()
+    {
+        if(grappleComponent == null) return;
+
+        grappleComponent.Unhook();
+    }
 }
